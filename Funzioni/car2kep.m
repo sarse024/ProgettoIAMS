@@ -57,7 +57,7 @@ function [a,e,i,OM,om,th]=car2kep(r,v,mu)
     else
         th=2*pi-acos(dot(e_vect,r)/(e*r_norm));
     end
-    %angles in degrees
+    %change angles in degrees
     i=rad2deg(i);
     OM=rad2deg(OM);
     om=rad2deg(om);
