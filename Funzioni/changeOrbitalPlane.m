@@ -109,7 +109,7 @@ else
 end
 
 % Time of flight from th0 to th
-delta_t = timeOfFlight(a,e,th0,th);
+delta_t = timeOfFlight(a,e,th0,th,mu);
 
 % Conversion output rad to deg
 th = rad2deg(th);
