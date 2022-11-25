@@ -108,10 +108,12 @@ else
     delta_v = abs(2*v_t*sin(alpha/2)); 
 end
 
-% Time of flight from th0 to th
-delta_t = timeOfFlight(a,e,th0,th,mu);
-
 % Conversion output rad to deg
 th = rad2deg(th);
 om2 = rad2deg(om2);
+
+% Time of flight from th0 to th
+delta_t = timeOfFlight(a,e,rad2deg(th0),th,mu);
+
+
 end

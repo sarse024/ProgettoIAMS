@@ -102,9 +102,9 @@ if(nargin == 8)
     
     % Time of flight from th0 to first point of maneuver
     if(strcmp(option,'per'))
-        delta_t(1) = timeOfFlight(aI,eI,th0, 0,mu); % Case pericenter
+        delta_t(1) = timeOfFlight(aI,eI,rad2deg(th0), 0,mu); % Case pericenter
     else
-        delta_t(1) = timeOfFlight(aI,eI,th0, pi,mu); % Case apocenter
+        delta_t(1) = timeOfFlight(aI,eI,rad2deg(th0), 180,mu); % Case apocenter
     end
 
     delta_t(2) = pi*sqrt(a_t^3/mu);
@@ -156,9 +156,9 @@ else
 
     % Time of flight from th0 to first point of maneuver
     if(strcmp(option,'per'))
-        delta_t(1) = timeOfFlight(aI,eI,th0, 0,mu); % Case pericenter
+        delta_t(1) = timeOfFlight(aI,eI,rad2deg(th0), 0,mu); % Case pericenter
     else
-        delta_t(1) = timeOfFlight(aI,eI,th0, pi,mu); % Case apocenter
+        delta_t(1) = timeOfFlight(aI,eI,rad2deg(th0), 180,mu); % Case apocenter
     end
 
     % Time of flight of first trasfer orbit
@@ -169,4 +169,4 @@ else
 end
 
 % Conversion rad to deg
-th_f = deg2rad(th_f);
+th_f = rad2deg(th_f);
