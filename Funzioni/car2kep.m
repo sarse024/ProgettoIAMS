@@ -44,7 +44,7 @@ function [a,e,i,OM,om,th]=car2kep(r,v,mu)
         OM=2*pi-acos(n_vect(1)/n_norm);
     end
     %pericentre anomaly
-    if e(end)>=0
+    if e_vect(end)>=0
         om=acos(dot(n_vect,e_vect)/(n_norm*e));
     else
         om=2*pi-acos(dot(n_vect,e_vect)/(n_norm*e));
