@@ -49,4 +49,4 @@ end
 % Speed difference module of maneuver:
 dv = 2*sqrt(mu/(a*(1-e^2)))*e*sin(dom/2);
 % Time of Flight to reach the maneuver point:
-dt = timeOfFlight(a, e, rad2deg(th0), thf(1));
+dt = timeOfFlight(a, e, rad2deg(th0), thf(1), mu);
