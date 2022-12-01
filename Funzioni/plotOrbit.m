@@ -10,10 +10,10 @@ function [X,Y,Z] = plotOrbit(kepEl, mu, deltaTh, stepTh)
 % elements for a specific arc length.
 %
 % INPUT:
-% kepEl [1x6] orbital elements [km,rad]
+% kepEl [1x6] orbital elements [km,deg]
 % mu [1x1] gravitational parameter [km^3/s^2]
-% deltaTh [1x1] arc length [rad]
-% stepTh [1x1] arc length step [rad]
+% deltaTh [1x1] arc length [deg]
+% stepTh [1x1] arc length step [deg]
 %
 % OUTPUT:
 % X [1xn] X position [km]
@@ -31,6 +31,8 @@ function [X,Y,Z] = plotOrbit(kepEl, mu, deltaTh, stepTh)
     OM=deg2rad(OM);
     om=deg2rad(om);
     th0=deg2rad(th0);
+    deltaTh=deg2rad(deltaTh);
+    stepTh=deg2rad(stepTh);
     %finding the final theta value and creating the theta vector which
     %contains every theta value
     thf=th0+deltaTh;
