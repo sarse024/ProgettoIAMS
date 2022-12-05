@@ -18,8 +18,8 @@ dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.00
 %dati_elaborati = [-7394.8822 849.6501 4181.2069 -3.0970 -5.2110 -3.5690 15660.0000 0.2659 0.8321 1.2440 2.9320 3.0970];
 
 %dati orbita iniziale
-rI = dati_elaborati(1:3);
-vI = dati_elaborati(4:6);
+rI = dati_elaborati(1:3)';
+vI = dati_elaborati(4:6)';
 
 %calcolo altri parametri orbita iniziale
 [aI, eI, iI, OMI, omI, thI] = car2kep(rI, vI, mu);
