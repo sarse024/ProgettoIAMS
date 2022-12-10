@@ -1,4 +1,4 @@
-function [f_conic,a,e] = def_conic(f1,f2,a)
+function [f_conic,a,e, pmin, th_rotation] = def_conic(f1,f2,a)
     
     A = 16*a^2-4*(f1(1) - f2(1))^2;
     B = -8*(f1(1) - f2(1))*(f1(2) - f2(2));
@@ -26,5 +26,9 @@ function [f_conic,a,e] = def_conic(f1,f2,a)
     if(B^2-4*A*C>0) %caso iperbole
         a = -a;
     end
-
+    
+    xmin = (E*B-2*C*D)/(4*A*C-B^2);
+    ymin = 1/B*(-2*A*xmin - D);
+    pmin = [xmin,ymin];
+    th_rotation = 1/2*rad2deg(acot((A-C)/B));
 end
