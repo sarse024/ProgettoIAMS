@@ -68,8 +68,8 @@ fprintf(['Parametri orbitali punto di arrivo:\n' ...
         '%4.2f\t %.4f\t %2.2f\t %2.2f\t %2.2f\t %2.2f\n'], kepF(1), kepF(2), kepF(3),kepF(4),kepF(5), kepF(6))
 
 % cambio di forma: Manovra 1
-% dall'apocentro dell'orbita 1 al pericentro dell'orbita 2 (perché
-% l'apocentro è più vicino):
+% dal pericentro dell'orbita 1 all'apocentro dell'orbita 2:
+
 % gestione casi strani orbtia di trasferimento
 omT = omI;
 if(strcmp(option, 'per'))
@@ -253,7 +253,6 @@ orbitF = plot3(X,Y,Z, 'LineWidth', 2);
 target = plot3(rF(1), rF(2), rF(3), 'xr', 'LineWidth', 4);
 
 % traettoria da thI a punto di manovra th_man
-
 [X,Y,Z] = plotOrbit(kepI,mu,abs(thI-th_man),precision);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
@@ -271,7 +270,6 @@ Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
 
 % cambio di piano : Manovra 2
-
 % traettoria da th1 a punto di manovra th2
 [X,Y,Z] = plotOrbit(kep1,mu,abs(th1-th2),precision);
 X_traj = X;
@@ -286,19 +284,15 @@ pt_changePlane = plot3(r2(1), r2(2), r2(3), 'ok', 'LineWidth', 2);
 [X,Y,Z] = plotOrbit(kep2,mu,abs(th2-th3),precision);
 orbit2 = plot3(X,Y,Z,'--r', 'LineWidth', 1);
 
-
 % punto di manovra 3
 [r31, v31] = kep2car(aF, eF, iF, OMF, om1, th31, mu);
 pt_changePeriapsis = plot3(r31(1), r31(2), r31(3), '^g', 'LineWidth', 2);
 
 %aggiorno traettoria da th2 a punto di manovra th31
-
 [X,Y,Z] = plotOrbit(kep2,mu,abs(th2-th3),precision);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
-
-
 
 % ultimo pezzo: arrivo fino al target
 % aggiorno traiettoria
@@ -307,11 +301,8 @@ X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
 
-
-
 %satellite
 h = plot3(nan,nan,nan,"om", 'LineWidth',4);
-
 
 %disegno satellite che segue la traettoria
 for i = 1:step_animation:length(X_traj)
@@ -320,5 +311,3 @@ for i = 1:step_animation:length(X_traj)
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
 drawnow
-
-
