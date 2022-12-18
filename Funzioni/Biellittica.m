@@ -89,7 +89,7 @@ in_be = plot3(r_in_be(1), r_in_be(2), r_in_be(3), 'xb', 'LineWidth', 4);
 % trasferimento
 
 % manovra 1: primo cambio di periasse
-om_T = 180;
+om_T = 180; % è sbagliato!!!!!!! 
 [dv1, om_T, vec_th1, dt1] = changePeriapsisArg(aI, eI, omI, (om_T-omI), thI);
 
 th11 = vec_th1(1);
