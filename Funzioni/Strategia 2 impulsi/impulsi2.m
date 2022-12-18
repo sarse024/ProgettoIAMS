@@ -1,4 +1,5 @@
 %% strategia 2 impulsi
+%%%%%%%% INIZIALIZZAZIONE DEL PROBLEMA %%%%%%%%%%%
 clear all;
 close all;
 clc;
@@ -19,6 +20,7 @@ ALLERT = 6378 + 300; %Km
 option = 'asc'; %asc o disc
 precision = 0.1;
 toll = 1e-4;
+step_animation = 50;
 
 %%%%%%%% GRUPPO B7 %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
@@ -101,17 +103,17 @@ if(abs(r_point-r2) > toll)
     error('Errore di precisione')
 end
 
-th_initial = 0:359;
+th_initial = 1:360;
 %th_initial = mod(th_initial,360);
-%%
+%% PARTE DI CALCOLO 
+% Tempo di run circa 10 minuti
 risult = [th_initial', zeros(length(th_initial),1), zeros(length(th_initial),1)]; %[th_initial, delta_v, delta_t]
 
-%%
-tic
+timeOfRunning = tic;
 wb = waitbar(0,'Calcolo Orbite');
 for k = 1:length(th_initial)
     r1 = kep2car(aI,eI,iI,OMI,omI,th_initial(k),mu);
-    [kepT, dv, th] = findOrbit(r1,r2,kepI,kepF,option);
+    [kepT, dv, th] = findOrbit(r1,r2,kepI,kepF);
     risult(k,2) = dv;
 
     %[X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
@@ -124,38 +126,46 @@ for k = 1:length(th_initial)
     waitbar(k/length(th_initial), wb, sprintf('Calcolo Orbite: %2.0f %%', k/length(th_initial)*100));
 end
 delete(wb)
-toc
-%pulisco la matrice dei risultati 
-%%
+toc(timeOfRunning)
 risultTest = risult;
-%%
+%% PARTE DI RISULTATI E CONTI %%
+
+
+%if(strcmp(option, 'asc'))
+%    risult = load("RisultatiNodoAscendente.mat",'-mat');
+%else
+%    risult = load("RisultatiNodoDiscendente.mat",'-mat');
+%end
+%risult = risult.risultTest
+
 risult = risultTest;
 
+%pulisco la matrice dei risultati 
 for k = length(risult):-1:1
     if(risult(k,2) == 0)
         risult(k,:) = []; %cancello la riga
-        k = k;
     end
 end
-%%
+
 figure(fig1)
 [vmin, kvmin] = min(risult(:,2));
 [r1,v1] = kep2car(aI,eI,iI,OMI,omI,risult(kvmin,1),mu);
-[kepT, dv, th] = findOrbit(r1,r2,kepI,kepF,option);
+[kepT, dv, th] = findOrbit(r1,r2,kepI,kepF);
 [X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
-plot3(X,Y,Z);
+orbitaT = plot3(X,Y,Z);
 
-%%
 figure
 tiledlayout(2,1)
 nexttile
 plot(risult(:,1),risult(:,2),'-o');
-title('Confronto velocità optimizzata')
+title('Velocità optimizzata rispetto al th1');
+xlabel('th1 [deg]'), ylabel('Velocità [km/s]')
 nexttile
 plot(risult(:,1),risult(:,3)/60/60,'-o');
-title('Confronto tempo optimizzato')
+xlabel('th1 [deg]'), ylabel('Time [ore]')
+title('Tempo rispetto al th1');
 
-%% test grafici
+% test grafici
 figure(fig1)
 a = kepT(1);
 e = kepT(2);
@@ -177,7 +187,7 @@ fprintf('Angolo di velocità: \n') %Da calcolare
 fprintf(['Parametri Orbitali:\n' ...
         '\ta\t\t\te\t\ti\t\tOM\t\tom\t\n ' ...
         '%4.2f\t %.4f\t %2.2f\t %2.2f\t %2.2f\n'], kepT(1),kepT(2),kepT(3),kepT(4),kepT(5))
-fprintf('Errore sul primo punto di manovra: %2.2f m\n', norm(rprov1-r1))
+fprintf('Errore sul primo punto di manovra: %2.2f m\n', norm(rprov1-r1)*1000)
 
 
 [rprov2, vprov2] = kep2car(a, e, kepT(3), kepT(4), om, new_th2,mu);
@@ -186,8 +196,61 @@ fprintf('Seconda manovra:\n')
 fprintf('Punto di manovra:%f\n',new_th2)
 fprintf('Velocita: %2.4f\n', norm(v_point-vprov2))
 fprintf('Angolo di velocità: \n') %Da calcolare
-fprintf('Errore sul secondo punto di manovra: %2.2f m\n', norm(r_point-rprov2))
+fprintf('Errore sul secondo punto di manovra: %2.2f m\n', norm(r_point-rprov2)*1000)
 fprintf('Time of flight: %4.2f\n', timeOfFlight(a,e,new_th1,new_th2,mu))
+
+%%% ANIMAZIONE %%%
+
+if(th1 < thI)
+    dTh = 360 + th1 - thI;
+else
+    dTh = th1 - thI; %serve abs nel caso in cui th3 sia uguale a 0
+end
+
+%tratto sull'orbita iniziale per raggiunger il primo punto di manovra
+[X_traj,Y_traj,Z_traj] = plotOrbit(kepI,mu,dTh,precision);
+
+if(new_th2 < new_th1)
+    dTh = 360 + new_th2 - new_th1;
+else
+    dTh = new_th2 - new_th1; %serve abs nel caso in cui th3 sia uguale a 0
+end
+
+%tratto sull'orbita di trasferimento per raggiunger il secondo punto di manovra
+[X,Y,Z] = plotOrbit(kepT,mu,dTh,precision);
+X_traj = [X_traj; X];
+Y_traj = [Y_traj; Y];
+Z_traj = [Z_traj; Z];
+
+kepF = [aF,eF,iF,OMF,omF,th2];
+
+if(thF < th2)
+    dTh = 360 + thF - th2;
+else
+    dTh = thF - th2;
+end
+
+%tratto sull'orbita finale per raggiunger il punto finale
+[X,Y,Z] = plotOrbit(kepF,mu,dTh,precision);
+X_traj = [X_traj; X];
+Y_traj = [Y_traj; Y];
+Z_traj = [Z_traj; Z];
+
+%satellite
+h = plot3(nan,nan,nan,"om", 'LineWidth',4);
+
+legend([start, orbitaT, target, h], 'Punto iniziale', 'Orbita di trasferimento', 'Punto Finale', 'Satellite')
+
+xlabel('X axis'), ylabel('Y axis'), zlabel('Z axis')
+set(gca, "CameraPosition", 10^4*[1,1,0.6]); %parametro da aggiustare
+
+%disegno satellite che segue la traettoria
+for i = 1:step_animation:length(X_traj)
+    set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
+    drawnow
+end
+set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
+drawnow
 
 
 
