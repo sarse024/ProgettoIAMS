@@ -28,7 +28,9 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
     % Costant
     ALLERT = 6378 + 300; %Km to avoid collision with Earth
     DIM = 1e3; % to improve the precision of formula
-    toll = 1e-3; %precision of 1 m
+    toll = 1e-2; %precision of 1 m
+    PREC = 5e3;
+    COST = 10;
     
     % Orbital value of first orbit
     a1 = kep1(1);
@@ -56,7 +58,7 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
     end
     
     % Inclination of the plane
-    iT = rad2deg(acos(N(end)/norm(N))); %inclinazione del piano
+    iT = rad2deg(acos(N(end)/norm(N)));
     
     % Node line
     k = [0 0 1];
@@ -85,23 +87,36 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
         [~,v2] = kep2car(a2,e2,i2,OM2,om2,th2,mu);
     end
     
-    % Calcolate r1 and r2 in the orbital plane
+    % Calcolate r1 and r2 in the orbital plane. 
     R = rotationMatrix(iT,OMT,0); % define the R matrix
-    p1 = R*r1/DIM; % downgrade of DIM time for improve convergency of the fimplicit method
+    p1 = R*r1/DIM; % downgrade of DIM time. The most important thing is to calculate the angle
     p2 = R*r2/DIM;
-
-    % Define the geometric locus of the positions of the second focus (form
-    % of conic section usually hyperbola)
-    a = 1/2*abs(norm(p2) - norm(p1));
-    focalHyper = def_conic(p1,p2,a);
     
+    % Define the geometric locus of the positions of the second focus (form
+    % of conic section usually hyperbola). p1 and p2 are the new foci of
+    % the new conic
+    a = 1/2*abs(norm(p2) - norm(p1));
+    [~, ~, a, b, pos_center, th_rotation] = def_conic(p1,p2,a);
+
     % Extrapolate the points that belong to the hyperbola
-    fig = figure;
-    fp = fimplicit(focalHyper, [-DIM, DIM, -DIM, DIM]/DIM*100, 'MeshDensity',5000); % provare a risolvere definendo in un altro modo i punti dei rami di iperbole
-    focal = [fp.XData; fp.YData];
-    close(fig)
-    % operazione decisamente molto costosa
-    % all'aumentare del meshdensity aumenta il tempo computazionale
+
+    x1 = linspace(abs(a), COST*abs(a), PREC);  %From 0 to a, Upper
+    ytop =  b*sqrt((x1).^2/a^2-1);  %Upper Hyperbola Part
+    ybot = -b*sqrt((x1).^2/a^2-1);  %Lower Hyperbola Part
+    
+    % define the rotation matrix for clockwise angle (th_rotation)
+    R = @(th) [cos(th), -sin(th); sin(th), cos(th)];
+    
+    % create the hyperbola by joining the x and y points
+    x_point = [x1, x1, -x1, -x1];
+    y_point = [ytop, ybot, ytop, ybot];
+    
+    % rotate hyperbola of th_rotation
+    focal = R(deg2rad(th_rotation))*[x_point; y_point];
+
+    % translate the hyperbola to the position of the center
+    focal(1,:) = focal(1,:) + pos_center(1);
+    focal(2,:) = focal(2,:) + pos_center(2);
     
     % define vector to find minimum  
     orbit_shape = [];
@@ -132,8 +147,9 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
             % check if the pericenter is above the risk of collision
             if(a*(1-e) >= ALLERT)
                 
-                 % find omT in the transfert plane
-                omT = rad2deg(atan2(fc(2),fc(1)))-180; % non è detto che vali sempre perchè si potrebbe girare il fuoco!!!
+                % find omT in the transfert plane
+                omT = rad2deg(atan2(fc(2),fc(1))) - 180; % non è detto che vali sempre perchè si potrebbe girare il fuoco!!!
+                
                 if(omT < 0)
                     omT = omT + 360;
                 end
@@ -152,6 +168,17 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
                 
                 [new_r1,new_v1] = kep2car(a,e,iT,OMT,omT,new_th1,mu);       
                 [new_r2,new_v2] = kep2car(a,e,iT,OMT,omT,new_th2,mu);
+                
+                
+                % plotting same example in direttissima
+                %{
+                if(mod(k,100) == 0)
+                    kepT = [a,e,iT,OMT,omT,0];
+                    [X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
+                    plot3(X,Y,Z);
+                end
+                %}
+
 
                 % check the precisione with vectorial difference of r1 and new_r1 (same with r2 and new_r2)
                 COND = norm(new_r2 - r2) < toll && norm(new_r1 - r1) < toll;
@@ -166,12 +193,16 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
             end
         end
     end
+
     if(isempty(dv)) % don't exist any orbit that is an ellipse with the correct precision of 1 m without crashing the Earth
         kepT = [0, 0, 0, 0, 0, 0];
         dv = 0;
         th = [th1, 0, 0, th2];
     else
+        % search minimum 
         [dv, k_vmin] = min(dv);
+        
+        % return the data of the minimum orbit
         kepT = [orbit_shape(k_vmin,1), orbit_shape(k_vmin,2),iT, OMT, orbit_shape(k_vmin,3), th(k_vmin,1)];
         th = [th1, th(k_vmin,1), th(k_vmin,2), th2];
     end

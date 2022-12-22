@@ -3,11 +3,6 @@ clear;
 clc;
 close all;
 
-% COSE DA FARE:
-% Provare ad eliminare il passaggio con il meshdensity
-% Commentare bene
-% Sistemare findOrbit
-
 % costant
 global mu;
 
@@ -17,10 +12,6 @@ step_animation = 10;
 
 %%%%%%%% GRUPPO B7 %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
-
-%altri gruppi per prova da eliminare
-%dati_elaborati = [-7394.8822 849.6501 4181.2069 -3.0970 -5.2110 -3.5690 15660.0000 0.2659 0.8321 1.2440 2.9320 3.0970];
-%dati_elaborati = [-6096.8804 -1361.2133 4888.2313 -0.2075 -7.2520 -1.4010 12860.0000 0.2842 1.4520 0.3340 2.7340 2.9360];
 
 % --- Initial Orbit ---
 rI = dati_elaborati(1:3)';
@@ -98,7 +89,6 @@ fprintf('Ore: %5.2f h\n', t/60/60)
 fprintf('Giorni: %5.2f d\n', t/60/60/24)
 
 %%% ANIMATION %%%
-
 % satellite
 h = plot3(nan,nan,nan,"om", 'LineWidth',4);
 
