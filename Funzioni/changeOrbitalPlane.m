@@ -100,6 +100,13 @@ else
     else
         om2 = 2*pi + (u2 - th);
     end
+    
+    delta_t_ascendent_node = timeOfFlight(a,e,rad2deg(th0), rad2deg(th),mu);
+    delta_t_discendent_node = timeOfFlight(a,e,rad2deg(th0), rad2deg(mod(pi+th,2*pi)) ,mu);
+
+    if(delta_t_discendent_node <= delta_t_ascendent_node)
+        th = mod(pi+th,2*pi);
+    end
 
     % Find transverse velocity in th
     v_t = sqrt(mu/(a*(1-e^2)))*(1+e*cos(th));
