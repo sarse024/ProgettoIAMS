@@ -11,6 +11,7 @@ option = 'asc'; %asc o disc to choise the line node in which intersecate the orb
 precision = 0.1;
 toll = 1e-4;
 step_animation = 50;
+t_tot = 0; % total time in s
 
 %%%%%%%% GRUPPO B7 %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
@@ -100,7 +101,7 @@ if(abs(r_point-r2) > toll)
 end
 
 %% Start to calculate the best orbit
-th_initial = 0:10:359; % vector with angle that we want to start
+th_initial = 23:0.1:25; % vector with angle that we want to start
 
 % initialize the risult matrix (usefull for search minimum)
 risult = [th_initial', zeros(length(th_initial),1), zeros(length(th_initial),1)]; %[th_initial, delta_v, delta_t]
@@ -194,15 +195,16 @@ t = t1 + t2 + t3;
 
 fprintf('%%%% MANOVRA CON V_tot MINIMA %%%%\n\n')
 fprintf('--- Prima manovra ---\n')
-stampInfoManovra(kepT, th1, t1, norm(vprov1-v1))
+stampInfoManovra(kepT, th1, t1, norm(vprov1-v1), t1)
 fprintf('Errore sul primo punto di manovra: %2.2f m\n\n', norm(rprov1-r1)*1000)
 
 kep2 = [aF,eF,iF,OMF,omF,th(4)];
 fprintf('--- Seconda manovra ---\n')
-stampInfoManovra(kep2, new_th2, t2, norm(v_point-vprov2))
+stampInfoManovra(kep2, new_th2, t2, norm(v_point-vprov2), t1 + t2)
 fprintf('Errore sul secondo punto di manovra: %2.2f m\n\n', norm(r_point-rprov2)*1000)
 
 fprintf('Tempo di attesa fino al target della missione dopo 2 impulso: %4.2f\n\n', t3)
+fprintf('\nTempo totale al target: %4.2f s\n', t)
 
 fprintf('--- Riassunto della manovra ---\n')
 fprintf('Costo Totale della manovra: %2.4f\n', vmin)
@@ -253,21 +255,21 @@ Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
 
 % initialize satellite
-h = plot3(nan,nan,nan,"om", 'LineWidth',4);
+h = plot3(nan,nan,nan,"om", 'MarkerSize',10, 'MarkerFaceColor', 'm');
 
 % legend
 legend([orbitI, start, orbitF, target, orbitT, first_point_man, second_point_man, h], 'Initial Orbit', 'Starting point', 'Final Orbit', 'Target point', 'Transfer Trajectory', 'First point of manoeuvre', 'Second point of manoeuvre', 'Satellite', 'Location','best')
 xlabel('X axis [Km]'), ylabel('Y axis [Km]'), zlabel('Z axis [Km]')
-
+%%
 % to save gif animation
 %pause(10)
-%gifFile = '2impulsi.gif';
-%exportgraphics(fig1, gifFile);
+gifFile = '2impulsi.gif';
+exportgraphics(fig1, gifFile);
 
 % animation
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
-    %exportgraphics(fig1, gifFile, Append=true);
+    exportgraphics(fig1, gifFile, Append=true);
     drawnow;
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));

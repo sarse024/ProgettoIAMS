@@ -11,13 +11,14 @@ mu = 398600;
 option = 'per'; % useful for changing start point in changeShape
 precision = 0.05; % step precision in plotOrbit [deg]
 step_animation = 40; % variable for animation of trajectory
+t_tot = 0; % total time in s
 
 % Initialize main figure
-figure
+fig1 = figure
 Terra3d
 hold on
 grid on
-title('Standard Strategy')
+title('Standard Strategy', fontsize=25)
 
 %%%%%%%% GRUPPO B7 %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
@@ -90,14 +91,15 @@ pt_changePlane = plot3(r1(1), r1(2), r1(3), 'or', 'LineWidth', 2);
 
 % Output change plane
 fprintf('\n---- CAMBIO DI PIANO ----\n')
-stampInfoManovra(kep1, th1, dt1,dv1)
+t_tot = t_tot + dt1;
+stampInfoManovra(kep1, th1, dt1, dv1, t_tot)
 
 
 % --- 2° Manoeuvre: change periapsisArg --- 
 [dv2, omPR, vec_th, dt2] = changePeriapsisArg(aI,eI,om1, (omF-om1), th1); 
 
 % Check if new om is correct (equal to omF)
-if(omPR ~= omF)
+if(abs(omPR -omF) > 0.005 )
     error('Error in the code')
 end
 
@@ -129,7 +131,8 @@ kep2= [aI, eI, iF, OMF, omF, th2];
 
 % output change Periapsis
 fprintf('\n---- CAMBIO DI PERIASSE ----\n')
-stampInfoManovra(kep2,th21, dt2, dv2)
+t_tot = t_tot + dt2;
+stampInfoManovra(kep2,th21, dt2, dv2, t_tot)
 
 % --- 3° Manoeuvre: change shape --- 
 
@@ -211,9 +214,11 @@ kep3 = [aF, eF, iF, OMF, omF, th3];
 % output change shape
 fprintf('\n---- CAMBIO DI FORMA ----\n')
 fprintf(['\n.... Prima manovra in ',option,' : ....\n'])
-stampInfoManovra(kepT, th_man, dt3(1), dv3(1));
+t_tot = t_tot + dt3(1);
+stampInfoManovra(kepT, th_man, dt3(1), dv3(1), t_tot);
 fprintf('\n.... Seconda manovra ....\n')
-stampInfoManovra(kep3, th3, dt3(2), dv3(2));
+t_tot = t_tot + dt3(2);
+stampInfoManovra(kep3, th3, dt3(2), dv3(2), t_tot);
 
 % --- Go to target --- 
 
@@ -234,12 +239,13 @@ Z_traj = [Z_traj; Z];
 
 % output attenting time to target
 fprintf('\nAttesa fino al punto finale: %4.2f s\n', dt4)
+fprintf('\nTempo totale al target: %4.2f s\n', dt4 + t_tot)
 
 dt_tot = dt1 + dt2 + sum(dt3) + dt4;
 dv_tot = dv1 + dv2 + sum(abs(dv3));
 
 % initialize satellite
-h = plot3(nan,nan,nan,"om", 'LineWidth',4);
+h = plot3(nan,nan,nan,"om", 'MarkerSize',10, 'MarkerFaceColor', 'm');
 
 % legend
 legend([orbitI orbitF start orbit1 pt_changePlane orbit2 pt_changePeriapsis target pt_changeShape1 orbit3 pt_changeShape2 h], 'Initial Orbit', 'Final Orbit', 'Starting Point', 'Plane change orbit', 'Plane change maneuver point', 'Periapsis change orbit', 'Periapsis change maneuver point', 'Final point', 'Shape change maneuver point 1 ', 'Shape change transfer maneuver', 'Shape change maneuver point 2', 'Satellite', 'Location', 'best')
@@ -248,21 +254,22 @@ set(gca, "CameraPosition", 10^4*[30 8 10]);
 
 % summary output
 fprintf('\n---- Riassunto strategia base ----\n')
-fprintf('Variazione di velocità totale: %2.3f km/s\n', dv_tot)
+fprintf('Variazione di velocità totale: %2.3f km/s\n', dv_tot*1000)
 fprintf('Tempo totale di manovra:\n')
 fprintf('Secondi: %5.2f s\n', dt_tot)
 fprintf('Minuti: %5.2f m\n', dt_tot/60)
 fprintf('Ore: %5.2f h\n', dt_tot/60/60)
 fprintf('Giorni: %5.2f d\n', dt_tot/60/60/24)
 
-% ANIMATION
+%% ANIMATION
 
-%gifFile = 'StardardStrategy.gif';
-%exportgraphics(fig1, gifFile);
+gifFile = 'StardardStrategy.gif';
+exportgraphics(fig1, gifFile);
 
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
     drawnow
+    exportgraphics(fig1, gifFile, Append=true);
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
 drawnow

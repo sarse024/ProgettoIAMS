@@ -1,4 +1,4 @@
-function stampInfoManovra(kepT, th_manovra, t,dv)
+function stampInfoManovra(kepT, th_manovra, t,dv, t_tot)
 % stampInfoManovra.m - Function to print output of the maneuver
 %
 % PROTOTYPE:
@@ -14,12 +14,13 @@ function stampInfoManovra(kepT, th_manovra, t,dv)
 % INPUT:
 % kepT          [1x6]   Orbital Parametre                                       [a,e,i,OM,om,th]
 % th_manovra    [1x1]   True anomaly of the point of maneuver on kepT orbit     [deg]
-% t             [1x1]   Time of flight                                          [s]
+% t             [1x1]   Time of flight of the maneuver                          [s]
 % dv            [1x1]   Speed difference                                        [km/s]
-%
+% t             [1x1]   Total Time of flight                                    [s]
 
     fprintf('Punto di manovra: %2.2f gradi\n', th_manovra)
     fprintf('Costo della manovra: %2.3f m/s\n', dv*1000)
+    fprintf('Tempo totale di manovra: %5.2f s\n', t_tot)
     fprintf('Tempo di manovra:\n')
     fprintf('- Secondi: %5.2f s\n', t)
     fprintf('- Minuti: %5.2f m\n', t/60)
