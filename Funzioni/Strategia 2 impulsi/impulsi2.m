@@ -7,7 +7,7 @@ clc;
 global mu;
 
 mu = 398600;
-option = 'disc'; %asc o disc to choise the line node in which intersecate the orbit
+option = 'asc'; %asc o disc to choise the line node in which intersecate the orbit
 precision = 0.1;
 toll = 1e-4;
 step_animation = 50;
@@ -41,20 +41,20 @@ Y_traj = [];
 Z_traj = [];
 
 % Initialize main figure
-fig1 = figure;
+fig1 = figure('WindowState','maximized');
 Terra3d;
 hold on
 grid on
-title('Strategia 2 impulsi Secante Ottimizzando punto di partenza')
+title('Optimized Secant Manoeuvre', fontsize=20)
 
 % plot intial orbit
 [X,Y,Z] = plotOrbit(kepI,mu,360,precision);
-orbitI = plot3(X,Y,Z, 'LineWidth', 2);
+plot3(X,Y,Z, '--', 'LineWidth', 1);
 start = plot3(rI(1), rI(2), rI(3), 'xb', 'LineWidth', 4);
 
 % plot final orbit
 [X,Y,Z] = plotOrbit(kepF,mu,360,precision);
-orbitF = plot3(X,Y,Z, 'LineWidth', 2);
+plot3(X,Y,Z, '--', "MarkerFaceColor", "#EDB120", 'LineWidth', 1);
 target = plot3(rF(1), rF(2), rF(3), 'xr', 'LineWidth', 4);
 
 fprintf('IMPLEMENTAZIONE STRATEGIA 2 IMPULSI OTTIMIZZATA punto di partenza:\n\n')
@@ -92,7 +92,7 @@ r2 = vector*t;
 [r_point,v_point]  = kep2car(aF,eF,iF,OMF,omF, rad2deg(th_intersection),mu);
 
 % plot the point of maneuvre
-point_man = plot3(r_point(1),r_point(2),r_point(3),'xm');
+second_point_man = plot3(r_point(1),r_point(2),r_point(3),'xm', 'LineWidth',3);
 
 % check if there is some error
 if(abs(r_point-r2) > toll)
@@ -100,7 +100,7 @@ if(abs(r_point-r2) > toll)
 end
 
 %% Start to calculate the best orbit
-th_initial = 1:360; % vector with angle that we want to start
+th_initial = 0:10:359; % vector with angle that we want to start
 
 % initialize the risult matrix (usefull for search minimum)
 risult = [th_initial', zeros(length(th_initial),1), zeros(length(th_initial),1)]; %[th_initial, delta_v, delta_t]
@@ -117,12 +117,12 @@ for k = 1:length(th_initial)
 
     % for plotting same example 
     %{
-    if (mod(k,100) == 0)
+    %if (mod(k,6) == 0)
         [X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
         plot3(X,Y,Z);
         plot3(r1(1),r1(2),r1(3), 'or','LineWidth',4);
-        text(r1(1),r1(2),r1(3), num2str(th_initial(k),3))
-    end
+        text(r1(1),r1(2),r1(3), strcat(num2str(th_initial(k),3), '°'), fontsize=20)
+    %end
     %}
 
     % calculate the different time from thI to thF
@@ -150,20 +150,25 @@ figure(fig1)
 [vmin, kvmin] = min(risult(:,2));
 [r1,v1] = kep2car(aI,eI,iI,OMI,omI,risult(kvmin,1),mu);
 [kepT, dv, th] = findOrbit(r1,r2,kepI,kepF);
-[X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
-orbitaT = plot3(X,Y,Z);
 
-% create graphs for comparison
+[X,Y,Z] = plotOrbit(kepT,mu,360, precision);
+plot3(X,Y,Z, '--r','LineWidth',1);
+
+[X,Y,Z] = plotOrbit(kepT,mu, mod(th(3)-th(2),360), precision);
+orbitT = plot3(X,Y,Z,'r','LineWidth', 2);
+
+%% create graphs for comparison
 figure
 tiledlayout(2,1)
 nexttile
 plot(risult(:,1),risult(:,2),'-o');
-title('Velocità optimizzata rispetto al th1');
-xlabel('th1 [deg]'), ylabel('Velocità [km/s]')
+title('Total Velocity variation with True Anomaly at Departure  ', fontsize=20);
+xlabel('True Anomaly at Departure [deg]', fontsize=15), ylabel('Velocity [km/s]', fontsize=15)
 nexttile
 plot(risult(:,1),risult(:,3)/60/60,'-o');
-xlabel('th1 [deg]'), ylabel('Time [ore]')
-title('Tempo rispetto al th1');
+xlabel('True Anomaly at Departure [deg]', fontsize=15);
+ylabel('Time [h]', fontsize=15)
+title('Total Time variation with True Anomaly at Departure', fontsize=20);
 
 %% graphic test and animation
 figure(fig1)
@@ -175,10 +180,9 @@ new_th2 = th(3);
 th2 = th(4);
 
 [rprov1, vprov1] = kep2car(kepT(1),kepT(2),kepT(3),kepT(4), kepT(5), new_th1,mu);
-punto = plot3(rprov1(1),rprov1(2),rprov1(3),'xm');
+first_point_man = plot3(rprov1(1),rprov1(2),rprov1(3),'xc', 'LineWidth',5);
 
 [rprov2, vprov2] = kep2car(kepT(1),kepT(2),kepT(3),kepT(4), kepT(5), new_th2,mu);
-prova2 = plot3(rprov2(1),rprov2(2),rprov2(3),'xm', 'LineWidth',5);
 
  % calculate the different time from thI to thF of the best transfert orbit
 t1 = timeOfFlight(aI,eI,thI,th1,mu);
@@ -218,6 +222,7 @@ end
 
 % drawn on the initial orbit to reach the first maneuvering point
 [X_traj,Y_traj,Z_traj] = plotOrbit(kepI,mu,dTh,precision);
+orbitI = plot3(X_traj,Y_traj,Z_traj, 'b', 'LineWidth', 2);
 
 if(new_th2 < new_th1)
     dTh = 360 + new_th2 - new_th1;
@@ -241,6 +246,8 @@ end
 
 % stretched on the final orbit to reach the final point
 [X,Y,Z] = plotOrbit(kepF,mu,dTh,precision);
+orbitF = plot3(X,Y,Z, "MarkerFaceColor", "#EDB120", 'LineWidth', 2);
+
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
@@ -249,15 +256,19 @@ Z_traj = [Z_traj; Z];
 h = plot3(nan,nan,nan,"om", 'LineWidth',4);
 
 % legend
-legend([start, orbitaT, target, h], 'Punto iniziale', 'Orbita di trasferimento', 'Punto Finale', 'Satellite')
+legend([orbitI, start, orbitF, target, orbitT, first_point_man, second_point_man, h], 'Initial Orbit', 'Starting point', 'Final Orbit', 'Target point', 'Transfer Trajectory', 'First point of manoeuvre', 'Second point of manoeuvre', 'Satellite', 'Location','best')
+xlabel('X axis [Km]'), ylabel('Y axis [Km]'), zlabel('Z axis [Km]')
 
-xlabel('X axis'), ylabel('Y axis'), zlabel('Z axis')
-set(gca, "CameraPosition", 10^4*[1,1,0.6]); %parametro da aggiustare
+% to save gif animation
+%pause(10)
+%gifFile = '2impulsi.gif';
+%exportgraphics(fig1, gifFile);
 
 % animation
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
-    drawnow
+    %exportgraphics(fig1, gifFile, Append=true);
+    drawnow;
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
 drawnow

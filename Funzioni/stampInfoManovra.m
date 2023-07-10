@@ -19,7 +19,7 @@ function stampInfoManovra(kepT, th_manovra, t,dv)
 %
 
     fprintf('Punto di manovra: %2.2f gradi\n', th_manovra)
-    fprintf('Costo della manovra: %2.3f km/s\n', dv)
+    fprintf('Costo della manovra: %2.3f m/s\n', dv*1000)
     fprintf('Tempo di manovra:\n')
     fprintf('- Secondi: %5.2f s\n', t)
     fprintf('- Minuti: %5.2f m\n', t/60)

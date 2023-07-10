@@ -90,7 +90,7 @@ in_be = plot3(r_in_be(1), r_in_be(2), r_in_be(3), 'xb', 'LineWidth', 4);
 
 % manovra 1: primo cambio di periasse
 om_T = 180; % è sbagliato!!!!!!! 
-[dv1, om_T, vec_th1, dt1] = changePeriapsisArg(aI, eI, omI, (om_T-omI), thI);
+[dv1, om_T, vec_th1, dt1] = changePeriapsisArg(aI, eI, omI, th_in_be, thI);
 
 th11 = vec_th1(1);
 th1 = vec_th1(2);
@@ -120,7 +120,7 @@ orbit1 = plot3(X,Y,Z,'--g', 'LineWidth', 1);
 
 % output primo cambio di periasse
 fprintf('\n---- PRIMO CAMBIO DI PERIASSE ----\n')
-stampInfoManovra(kep1,th11, dt1, dv1)
+stampInfoManovra(kep1,th1, dt1, dv1)
 
 % dobbiamo ora raggiungere il pericentro dell'orbita --> da qui inizia la
 % biellittica

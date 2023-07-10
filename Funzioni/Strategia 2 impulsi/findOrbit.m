@@ -28,8 +28,8 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
     % Costant
     ALLERT = 6378 + 300; %Km to avoid collision with Earth
     DIM = 1e3; % to improve the precision of formula
-    toll = 1e-2; %precision of 1 m
-    PREC = 5e3;
+    toll = 1e-3; %precision of 1 m
+    PREC = 1e4;
     COST = 10;
     
     % Orbital value of first orbit
@@ -140,7 +140,7 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
         c = norm(fc/2);
         e = c/a;
 
-        if(e>=0 && e<1) %considero solo le ellissi 
+        if(e>=0 && e<1) %consider only the ellipse 
             
             a = a*DIM; % upscale a to the real value
 
@@ -170,9 +170,9 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
                 [new_r2,new_v2] = kep2car(a,e,iT,OMT,omT,new_th2,mu);
                 
                 
-                % plotting same example in direttissima
+                % plotting example for ppt in direttissima
                 %{
-                if(mod(k,100) == 0)
+                if(mod(k,500) == 0)
                     kepT = [a,e,iT,OMT,omT,0];
                     [X,Y,Z] = plotOrbit(kepT,mu,360,0.1);
                     plot3(X,Y,Z);
@@ -194,7 +194,7 @@ function [kepT, dv, th] = findOrbit(r1, r2, kep1, kep2)
         end
     end
 
-    if(isempty(dv)) % don't exist any orbit that is an ellipse with the correct precision of 1 m without crashing the Earth
+    if(isempty(dv)) % don't exist any orbit that is an ellipse with the correct precision without crashing the Earth
         kepT = [0, 0, 0, 0, 0, 0];
         dv = 0;
         th = [th1, 0, 0, th2];

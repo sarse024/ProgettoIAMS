@@ -38,16 +38,16 @@ fig1 = figure;
 Terra3d;
 hold on
 grid on
-title('Strategia Diretta')
+title('"Direttissima  Manoeuvre', fontsize=25)
 
 % plot intial orbit
 [X,Y,Z] = plotOrbit(kepI,mu,360,precision);
-orbitI = plot3(X,Y,Z, 'LineWidth', 2);
+orbitI = plot3(X,Y,Z, '--', 'LineWidth', 1);
 start = plot3(rI(1), rI(2), rI(3), 'xb', 'LineWidth', 4);
 
 % plot final orbit
 [X,Y,Z] = plotOrbit(kepF,mu,360,precision);
-orbitF = plot3(X,Y,Z, 'LineWidth', 2);
+orbitF = plot3(X,Y,Z, '--', 'LineWidth', 1);
 target = plot3(rF(1), rF(2), rF(3), 'xr', 'LineWidth', 4);
 
 % find the best transfert orbit from rI to rF
@@ -59,7 +59,7 @@ plot3(X,Y,Z, '--r','LineWidth',1);
 
 % plot trajectory in continuos line
 [X_traj,Y_traj,Z_traj] = plotOrbit(kepT, mu, mod(th(3)-th(2),360),precision);
-orbitaT= plot3(X_traj,Y_traj,Z_traj,'r','LineWidth',1.5);
+orbitT= plot3(X_traj,Y_traj,Z_traj,'r','LineWidth',2);
 
 % Calculate the two speeds by vector difference
 [r1,v1] = kep2car(kepT(1),kepT(2),kepT(3),kepT(4),kepT(5),th(2),mu);
@@ -81,7 +81,7 @@ fprintf('Errore sul secondo punto di manovra: %2.2f m\n', norm(r2-rF)*1000)
 
 % Summary output
 fprintf('\n---- Riassunto strategia 2 impulsi diretta ----\n')
-fprintf('Variazione di velocità totale: %2.3f km/s\n', norm(dv))
+fprintf('Variazione di velocità totale: %2.3f m/s\n', norm(dv)*1000)
 fprintf('Tempo totale di manovra:\n')
 fprintf('Secondi: %5.2f s\n', t)
 fprintf('Minuti: %5.2f m\n', t/60)
@@ -92,13 +92,18 @@ fprintf('Giorni: %5.2f d\n', t/60/60/24)
 % satellite
 h = plot3(nan,nan,nan,"om", 'LineWidth',4);
 
-legend([start, orbitaT, target, h], 'Punto iniziale', 'Orbita di trasferimento', 'Punto Finale', 'Satellite')
-xlabel('X axis'), ylabel('Y axis'), zlabel('Z axis')
-set(gca, "CameraPosition", 10^4*[1,1,0.6]);
+legend([orbitI, start, orbitF, target, orbitT, h], 'Initial Orbit', 'Starting point', 'Final Orbit', 'Target point', 'Transfer Trajectory', 'Satellite', 'Location','best')
+xlabel('X axis [Km]'), ylabel('Y axis [Km]'), zlabel('Z axis [Km]')
+set(gca, "CameraPosition", 10^4*[1 1.4 0.1]);
+
+%gifFile = 'Direttissima.gif';
+%exportgraphics(fig1, gifFile);
+
 % draw satellite on the trajectory
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
     drawnow
+    %exportgraphics(fig1, gifFile, Append=true);
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
 drawnow

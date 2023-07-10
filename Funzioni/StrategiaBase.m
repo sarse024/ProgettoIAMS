@@ -9,22 +9,18 @@ global mu;
 mu = 398600;
 
 option = 'per'; % useful for changing start point in changeShape
-precision = 0.1; % step precision in plotOrbit [deg]
-step_animation = 50; % variable for animation of trajectory
+precision = 0.05; % step precision in plotOrbit [deg]
+step_animation = 40; % variable for animation of trajectory
 
 % Initialize main figure
 figure
 Terra3d
 hold on
 grid on
-title('Strategia base')
+title('Standard Strategy')
 
 %%%%%%%% GRUPPO B7 %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
-
-%altri gruppi per prova da cancellare
-%dati_elaborati = [-7394.8822 849.6501 4181.2069 -3.0970 -5.2110 -3.5690 15660.0000 0.2659 0.8321 1.2440 2.9320 3.0970];
-%dati_elaborati = [-6096.8804 -1361.2133 4888.2313 -0.2075 -7.2520 -1.4010 12860.0000 0.2842 1.4520 0.3340 2.7340 2.9360];
 
 % --- Initial Orbit ---
 rI = dati_elaborati(1:3)';
@@ -36,7 +32,7 @@ kepI = [aI,eI,iI,OMI,omI,thI];
 
 % plot initial orbit
 [X,Y,Z] = plotOrbit(kepI,mu,360,precision);
-orbitI = plot3(X,Y,Z, 'LineWidth', 2);
+plot3(X,Y,Z, '--', 'LineWidth', 1);
 % plot starting point
 start = plot3(rI(1), rI(2), rI(3), 'xb', 'LineWidth', 4);
 
@@ -54,15 +50,13 @@ kepF = [aF,eF,iF,OMF,omF,thF];
 
 % plot final orbit
 [X,Y,Z] = plotOrbit(kepF,mu,360,precision);
-orbitF = plot3(X,Y,Z, 'LineWidth', 2);
+orbitF = plot3(X,Y,Z, '--', 'LineWidth', 1);
 target = plot3(rF(1), rF(2), rF(3), 'xr', 'LineWidth', 4);
 
 % vector for store point of the trajectory
 X_traj = [];
 Y_traj = [];
 Z_traj = [];
-
-
 
 fprintf('IMPLEMENTAZIONE STRATEGIA BASE:\n\n')
 
@@ -78,6 +72,7 @@ fprintf(['Parametri orbitali punto di arrivo:\n' ...
 
 % update trajectory from thI to point of maneuvre th1
 [X,Y,Z] = plotOrbit(kepI,mu,abs(thI-th1),precision);
+orbitI = plot3(X,Y,Z, 'b', 'LineWidth', 2);
 X_traj = X;
 Y_traj = Y;
 Z_traj = Z;
@@ -86,15 +81,17 @@ kep1 = [aI, eI, iF, OMF, om1, th1]; % Orbital parametre vector of first orbit tr
 
 % Plot first orbit transfert
 [X,Y,Z] = plotOrbit(kep1,mu,360,precision);
-orbit1 = plot3(X,Y,Z,'--r', 'LineWidth', 1);
+%plot3(X,Y,Z,'--r', 'LineWidth', 1);
 
 % Plot first transfert manouvre point
 [r1, v1] = kep2car(aI, eI, iF, OMF, om1, th1, mu);
-pt_changePlane = plot3(r1(1), r1(2), r1(3), 'ok', 'LineWidth', 2);
+pt_changePlane = plot3(r1(1), r1(2), r1(3), 'or', 'LineWidth', 2);
+
 
 % Output change plane
 fprintf('\n---- CAMBIO DI PIANO ----\n')
-stampInfoManovra(kep1, thI, dt1,dv1)
+stampInfoManovra(kep1, th1, dt1,dv1)
+
 
 % --- 2° Manoeuvre: change periapsisArg --- 
 [dv2, omPR, vec_th, dt2] = changePeriapsisArg(aI,eI,om1, (omF-om1), th1); 
@@ -118,6 +115,7 @@ else
     dTh = th21-th1;
 end
 [X,Y,Z] = plotOrbit(kep1,mu,dTh,precision);
+orbit1 = plot3(X,Y,Z,'r', 'LineWidth', 2);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
@@ -127,7 +125,7 @@ kep2= [aI, eI, iF, OMF, omF, th2];
 
 % plot the second orbit
 [X,Y,Z] = plotOrbit(kep2,mu,360,precision);
-orbit2 = plot3(X,Y,Z,'--g', 'LineWidth', 1);
+%plot3(X,Y,Z,'--g', 'LineWidth', 1);
 
 % output change Periapsis
 fprintf('\n---- CAMBIO DI PERIASSE ----\n')
@@ -172,13 +170,19 @@ else
     dTh = th_man - th2;
 end
 [X,Y,Z] = plotOrbit(kep2,mu,dTh,precision);
+orbit2 = plot3(X,Y,Z, 'g', 'LineWidth', 2);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
 
 % plot the initial point of the changeShape
 [r3, v3] = kep2car(aI, eI, iF, OMF, omF, th_man, mu);
-pt_changeShape = plot3(r3(1), r3(2), r3(3), 'oc', 'LineWidth', 1);
+pt_changeShape1 = plot3(r3(1), r3(2), r3(3), 'ok', 'LineWidth', 2);
+
+% plot the final point of the changeShape
+[r4, v4] = kep2car(aF, eF, iF, OMF, omF, 180, mu);
+pt_changeShape2 = plot3(r4(1), r4(2), r4(3), 'o', 'LineWidth', 2, 'Color', "#EDB120");
+
 
 % Pericenter-to-apocenter transfer
 [dv3, th3, dt3] = changeOrbitShape(aI, eI, omF, aF, eF, omF, th2, option);
@@ -188,9 +192,13 @@ aT = (rt1 + rt2)/2;
 eT = abs((rt2-rt1))/(rt1+rt2);
 kepT = [aT, eT, iF, OMF, omT, th_manT];
 
-% plot trasfert orbit
+% plot full trasfert orbit shape
+[X,Y,Z] = plotOrbit(kepT, mu, 360,precision);
+%plot3(X,Y,Z, '--k', 'LineWidth', 1);
+
+% plot trasfert orbit shape
 [X,Y,Z] = plotOrbit(kepT, mu, 180,precision);
-orbit3 = plot3(X,Y,Z, '--k', 'LineWidth', 2);
+orbit3 = plot3(X,Y,Z, 'k', 'LineWidth', 2);
 
 % Update trajectory
 X_traj = [X_traj; X];
@@ -219,6 +227,7 @@ else
     dTh = thF - th3;
 end
 [X,Y,Z] = plotOrbit(kep3, mu, dTh,precision);
+orbitF = plot3(X,Y,Z, 'Color', "#EDB120", 'LineWidth', 2);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
@@ -233,7 +242,9 @@ dv_tot = dv1 + dv2 + sum(abs(dv3));
 h = plot3(nan,nan,nan,"om", 'LineWidth',4);
 
 % legend
-legend([orbitI orbitF start orbit1 pt_changePlane orbit2 pt_changePeriapsis target pt_changeShape orbit3 h], 'Orbtia Iniziale', 'Orbita Finale','Punto Iniziale', 'Orbita di cambio piano', 'Punto di manovra cambio piano', 'Orbita di cambio periasside?', 'Punto di manovra cambio periasse', 'Punto finale', 'Punto di manovra cambio forma', 'Manovra di trasferimento cambio forma', 'Satellite') %sistemare plot orbita
+legend([orbitI orbitF start orbit1 pt_changePlane orbit2 pt_changePeriapsis target pt_changeShape1 orbit3 pt_changeShape2 h], 'Initial Orbit', 'Final Orbit', 'Starting Point', 'Plane change orbit', 'Plane change maneuver point', 'Periapsis change orbit', 'Periapsis change maneuver point', 'Final point', 'Shape change maneuver point 1 ', 'Shape change transfer maneuver', 'Shape change maneuver point 2', 'Satellite', 'Location', 'best')
+xlabel('X axis [Km]'), ylabel('Y axis [Km]'), zlabel('Z axis [Km]')
+set(gca, "CameraPosition", 10^4*[30 8 10]);
 
 % summary output
 fprintf('\n---- Riassunto strategia base ----\n')
@@ -244,7 +255,11 @@ fprintf('Minuti: %5.2f m\n', dt_tot/60)
 fprintf('Ore: %5.2f h\n', dt_tot/60/60)
 fprintf('Giorni: %5.2f d\n', dt_tot/60/60/24)
 
-% animation
+% ANIMATION
+
+%gifFile = 'StardardStrategy.gif';
+%exportgraphics(fig1, gifFile);
+
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
     drawnow
