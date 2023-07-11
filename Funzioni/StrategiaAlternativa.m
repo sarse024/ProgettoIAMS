@@ -9,10 +9,11 @@ mu = 398600;
 
 option = 'per';
 precision = 0.1;
-step_animation = 10;
+step_animation = 50;
+t_tot = 0;
 
 %initialize main figure
-figure
+fig1 = figure
 Terra3d
 hold on
 grid on
@@ -132,9 +133,11 @@ kep1 = [aF, eF, iI, OMI, omI, th1];  % first transfer orbit --> final form
 % output change orbital shape
 fprintf('\n---- CHANGE ORBITAL SHAPE ----\n')
 fprintf(['\n.... First manoeuvre in ',option,' : ....\n'])
-stampInfoManovra(kepT, th_man, dt1(1), dv1(1));
+t_tot = dt1(1);
+stampInfoManovra(kepT, th_man, dt1(1), dv1(1), t_tot);
 fprintf('\n.... Second manoeuvre ....\n')
-stampInfoManovra(kep1, th1, dt1(2), dv1(2));
+t_tot = dt1(2) + t_tot;
+stampInfoManovra(kep1, th1, dt1(2), dv1(2), t_tot);
 
 % --- 2° Manoeuvre: change Orbital Plane --- 
 [dv2, om1, th2, dt2] = changeOrbitalPlane(aF, eF, iI, OMI, omI, iF, OMF, th1);
@@ -157,7 +160,8 @@ pt_changePlane = plot3(r2(1), r2(2), r2(3), 'ok', 'LineWidth', 2);
 
 % output change orbital plane
 fprintf('\n---- CHANGE ORBITAL PLANE ----\n')
-stampInfoManovra(kep2, th2, dt2, dv2)
+t_tot = t_tot + dt2;
+stampInfoManovra(kep2, th2, dt2, dv2, dt2)
 
 % --- 3° Manoeuvre: change periapsisArg --- 
 [dv3, omPR, vec_th, dt3] = changePeriapsisArg(aF,eF,om1, (omF-om1), th2); 
@@ -195,7 +199,8 @@ orbit3 = plot3(X,Y,Z,'--g', 'LineWidth', 1);
 
 % output change periapsis
 fprintf('\n---- CHANGE PERIAPSIS ----\n')
-stampInfoManovra(kep3,th31, dt3, dv3)
+t_tot = t_tot + dt3;
+stampInfoManovra(kep3,th31, dt3, dv3, t_tot)
 
 % --- Go to target --- 
 
@@ -219,7 +224,7 @@ dt_tot = sum(dt1) + dt2 + dt3 + dt4;
 dv_tot = sum(abs(dv1)) + abs(dv2) + abs(dv3);
 
 % initialize satellite
-h = plot3(nan,nan,nan,"om", 'LineWidth',4);
+h = plot3(nan,nan,nan,"om", 'MarkerSize',10, 'MarkerFaceColor', 'm');
 
 %legend
 legend([orbitI orbitF start orbit1 pt_changeShape orbit2 pt_changePlane target pt_changePeriapsis orbit3 h], 'Initial Orbit', 'Final Orbit','Initial point', 'Change shape orbit', 'Change shape manoeuvre point', 'Change plane orbit', 'Change plane manoeuvre point', 'Final Point', 'Change periapsis manoeuvre point', 'Change periapsis orbit', 'Satellite') %sistemare plot orbita
@@ -233,10 +238,15 @@ fprintf('Minuti: %5.2f h\n', dt_tot/60)
 fprintf('Ore: %5.2f d\n', dt_tot/60/60)
 fprintf('Giorni: %5.2f g\n', dt_tot/60/60/24)
 
+%% Animation 
+%gifFile = 'AlternativeStrategy.gif';
+%exportgraphics(fig1, gifFile);
+
 % animation
 for i = 1:step_animation:length(X_traj)
     set(h,'XData',X_traj(i),'YData',Y_traj(i),'ZData',Z_traj(i));
     drawnow
+    %exportgraphics(fig1, gifFile, Append=true);
 end
 set(h,'XData',X_traj(end),'YData',Y_traj(end),'ZData',Z_traj(end));
 drawnow
