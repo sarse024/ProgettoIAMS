@@ -148,7 +148,7 @@ pt_changePlane = plot3(r2(1), r2(2), r2(3), 'or', 'MarkerSize', 5, 'MarkerFaceCo
 
 % Output change of plane
 fprintf('\n---- CAMBIO DI PIANO ----\n')
-stampInfoManovra(kep2, th2, dt3,dv3, t_tot3)
+stampInfoManovra(kep2, th3, dt3,dv3, t_tot3)
 
 % Fourth maneuver: second half of the bielliptic
 ra3 = rb;
@@ -167,7 +167,7 @@ kep_t2 = [a_t2, e_t2, iF, OMF, om3, th3];
 %orbit3 = plot3(X,Y,Z,'--b', 'LineWidth', 1);
 
 fprintf('\n---- SECONDO IMPULSO BIELLITTICA ----\n')
-stampInfoManovra(kep_t2,th3, sum(abs(dt4)), sum(abs(dv4)), t_tot4)
+stampInfoManovra(kep_t2, th3, sum(abs(dt4)), sum(abs(dv4)), t_tot4)
 
 % Fifth maneuver: ricircularization of the orbit to intersect the final
 % orbit in its apocentre
@@ -186,10 +186,6 @@ orbit3 = plot3(X,Y,Z, 'r', 'LineWidth', 2);
 X_traj = [X_traj; X];
 Y_traj = [Y_traj; Y];
 Z_traj = [Z_traj; Z];
-
-% Plot final circular orbit
-%[X,Y,Z] = plotOrbit(kep5,mu,360,precision);
-%orbit4 = plot3(X,Y,Z,'--k', 'LineWidth', 1);
 
 % Output second circularization
 fprintf('\n---- SECONDA CIRCOLARIZZAZIONE ----\n')
@@ -213,7 +209,7 @@ Z_traj = [Z_traj; Z];
 
 % Output decircularization
 fprintf('\n---- DECIRCOLARIZZAZIONE ----\n')
-stampInfoManovra(kep6,th5, sum(dt6), sum(abs(dv6)), t_tot6)
+stampInfoManovra(kep6, (180 - abs(omF-om3)), sum(dt6), sum(abs(dv6)), t_tot6)
 
 % Ultimately, we reach the target point
 dt7 = timeOfFlight(aF, eF, th6, thF,mu);
