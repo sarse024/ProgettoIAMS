@@ -2,12 +2,16 @@
 clear;
 clc;
 close all;
+
 % defining parameters for the study:
 global mu;
 mu = 398600;
 
 %%%%%%%% B7 DATA %%%%%%%%
 dati_elaborati = [5088.9118 -3196.5659 -8222.7989 1.9090 5.6220 -1.0700 14020.0000 0.3576 1.3220 0.9764 1.8130 0.4336];
+
+% total time
+t_tot = 0;
 
 % Initial Orbit Data
 rI = dati_elaborati(1:3)';
@@ -57,7 +61,8 @@ dth1 = thman1 - thI;
 kep1 = [a1, e1, iI, OMI, omI, th1];
 
 fprintf('\n---- CIRCOLARIZZAZIONE 1 ----\n')
-stampInfoManovra(kep1,thman1, sum(abs(dt1)), sum(abs(dv1)))
+t_tot = dt1
+stampInfoManovra(kep1,thman1, sum(abs(dt1)), sum(abs(dv1)), t_tot)
 
 % Defining vectors used in the 'for' cicle to optimize the strategy
 rbv = linspace(aF, 5*aF, 10000);
